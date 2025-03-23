@@ -1,21 +1,16 @@
-import { Router } from 'express';
-import {
-  generateRecipe,
-  getAllRecipes,
-  createRecipe,
-  getRecipeById,
-  updateRecipe,
-  deleteRecipe
-} from '../controllers/recipe.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+import express from 'express';
+import { recipeController } from '../controllers/recipe.controller';
+import { authMiddleware } from '../middleware/auth';
 
-const router = Router();
+const router = express.Router();
 
-router.post('/generate', authMiddleware, generateRecipe);
-router.get('/', getAllRecipes);
-router.post('/', authMiddleware, createRecipe);
-router.get('/:id', getRecipeById);
-router.put('/:id', authMiddleware, updateRecipe);
-router.delete('/:id', authMiddleware, deleteRecipe);
+// Herkese açık rotalar
+router.get('/', recipeController.getAll);
+router.get('/:id', recipeController.getById);
+
+// Oturum gerektiren rotalar
+router.post('/', authMiddleware, recipeController.create);
+router.post('/ai-recipe', authMiddleware, recipeController.getAIRecipe);
+router.post('/:id/save', authMiddleware, recipeController.saveRecipe);
 
 export default router; 

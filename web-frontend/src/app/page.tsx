@@ -28,33 +28,35 @@ export default function Home() {
             </p>
             <a
               href="/malzemeler"
-              className="inline-block bg-rose-100 text-rose-700 px-6 py-3 rounded-2xl hover:bg-rose-200 transition-colors font-medium"
+              className="inline-block w-full text-center bg-rose-100 text-rose-700 px-6 py-3 rounded-2xl hover:bg-rose-200 transition-colors font-medium"
             >
               Malzemeleri Seç
             </a>
           </div>
 
-          <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all border border-rose-200">
+          <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-rose-100 group hover:border-rose-200">
+            <div className="text-rose-300 text-3xl mb-4 group-hover:text-rose-400">🥬</div>
             <h2 className="text-2xl font-serif text-gray-900 mb-4">Diyet Tercihleri</h2>
             <p className="text-gray-700 text-lg mb-6 leading-relaxed">
               Beslenme alışkanlıklarınıza uygun özel tarifler için tercihlerinizi belirleyin.
             </p>
             <a
               href="/diyet-tercihleri"
-              className="inline-block bg-rose-600 text-white px-6 py-3 rounded-xl hover:bg-rose-700 transition-colors font-medium"
+              className="inline-block w-full text-center bg-rose-100 text-rose-700 px-6 py-3 rounded-2xl hover:bg-rose-200 transition-colors font-medium"
             >
               Tercihleri Belirle
             </a>
           </div>
 
-          <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all border border-rose-200">
+          <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-rose-100 group hover:border-rose-200">
+            <div className="text-rose-300 text-3xl mb-4 group-hover:text-rose-400">📖</div>
             <h2 className="text-2xl font-serif text-gray-900 mb-4">Tariflerim</h2>
             <p className="text-gray-700 text-lg mb-6 leading-relaxed">
               Kaydettiğiniz ve en sevdiğiniz tarifleri kolayca görüntüleyin.
             </p>
             <a
               href="/tariflerim"
-              className="inline-block bg-rose-600 text-white px-6 py-3 rounded-xl hover:bg-rose-700 transition-colors font-medium"
+              className="inline-block w-full text-center bg-rose-100 text-rose-700 px-6 py-3 rounded-2xl hover:bg-rose-200 transition-colors font-medium"
             >
               Tariflere Git
             </a>

@@ -1,23 +1,23 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { AuthProvider } from '@/contexts/AuthContext';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Akıllı Yemek Tarifi",
-  description: "Mutfağınızdaki malzemelerle harikalar yaratın",
+  title: 'Yemek Tarifi',
+  description: 'AI destekli yemek tarifi uygulaması',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="tr">
-      <body className={inter.className}>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
         <AuthProvider>
           {children}
         </AuthProvider>

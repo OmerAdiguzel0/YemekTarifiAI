@@ -7,7 +7,8 @@
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "seed": "ts-node src/scripts/seedIngredients.ts"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
