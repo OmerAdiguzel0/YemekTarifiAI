@@ -30,22 +30,22 @@ export default function IngredientSelector({ malzemeler, onMalzemeSecimi }: Ingr
   const kategoriler = Array.from(new Set(malzemeler.map((m) => m.kategori)));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {kategoriler.map((kategori) => (
-        <div key={kategori} className="space-y-2">
-          <h3 className="text-lg font-semibold text-gray-700">{kategori}</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div key={kategori} className="space-y-4">
+          <h3 className="text-2xl font-serif text-rose-700">{kategori}</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {malzemeler
               .filter((m) => m.kategori === kategori)
               .map((malzeme) => (
                 <button
                   key={malzeme.id}
                   onClick={() => malzemeToggle(malzeme.id)}
-                  className={`p-3 rounded-lg text-left transition-colors ${
+                  className={`p-4 rounded-xl text-left transition-all ${
                     seciliMalzemeler.includes(malzeme.id)
-                      ? 'bg-indigo-100 text-indigo-700 border-2 border-indigo-500'
-                      : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
-                  }`}
+                      ? 'bg-rose-50 text-rose-700 border-2 border-rose-300 shadow-sm'
+                      : 'bg-white hover:bg-rose-50/50 text-gray-600 border border-rose-100'
+                  } font-light`}
                 >
                   {malzeme.isim}
                 </button>
@@ -54,8 +54,8 @@ export default function IngredientSelector({ malzemeler, onMalzemeSecimi }: Ingr
         </div>
       ))}
       
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-        <p className="text-sm text-gray-600">
+      <div className="mt-6 p-6 bg-white rounded-xl border border-rose-100">
+        <p className="text-sm text-gray-600 font-light">
           Seçili Malzeme Sayısı: {seciliMalzemeler.length} (3-10 arası seçim yapınız)
         </p>
       </div>
