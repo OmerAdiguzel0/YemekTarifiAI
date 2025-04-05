@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "AI Yemek Tarifi",
+    "slug": "ai-yemek-tarifi",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "aiyemektarifi",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "packagerOpts": {
+        "sourceExts": ["js", "jsx", "ts", "tsx"],
+        "config": "metro.config.js"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "-keep class com.swmansion.reanimated.** { *; }"
+          }
+        }
+      ]
+    ]
+  }
+}
