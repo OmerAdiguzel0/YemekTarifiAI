@@ -1,18 +1,15 @@
 {
   "expo": {
     "name": "AI Yemek Tarifi",
-    "slug": "ai-yemek-tarifi",
+    "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "aiyemektarifi",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
+      "backgroundColor": "#4CAF50"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -22,26 +19,24 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#4CAF50"
       }
+    },
+    "developmentClient": {
+      "silentLaunch": true
     },
     "web": {
-      "bundler": "metro",
-      "packagerOpts": {
-        "sourceExts": ["js", "jsx", "ts", "tsx"],
-        "config": "metro.config.js"
-      }
+      "favicon": null,
+      "themeColor": "#4CAF50"
     },
     "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "extraProguardRules": "-keep class com.swmansion.reanimated.** { *; }"
-          }
-        }
-      ]
-    ]
+      "expo-router"
+    ],
+    "scheme": "aiyemektarifi",
+    "primaryColor": "#4CAF50",
+    "colors": {
+      "primary": "#4CAF50"
+    }
   }
 }

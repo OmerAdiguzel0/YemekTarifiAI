@@ -1,232 +1,343 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, Modal } from 'react-native';
+import axios from 'axios';
+
+// IP adresini güncelleyelim
+const API_URL = 'http://192.168.1.101:5001'; // Doğru IP adresi
 
 const RecipeGenerator = () => {
   const [ingredients, setIngredients] = useState('');
-  const [diet, setDiet] = useState('vegan');
-  const [recipe, setRecipe] = useState('');
+  const [dietaryPreference, setDietaryPreference] = useState('genel');
+  const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
 
-  const generateRecipe = async () => {
-    if (!ingredients.trim()) {
-      alert('Lütfen en az bir malzeme girin');
+  const dietaryOptions = [
+    { label: 'Genel', value: 'genel' },
+    { label: 'Vejetaryen', value: 'vejetaryen' },
+    { label: 'Vegan', value: 'vegan' },
+    { label: 'Glutensiz', value: 'glutensiz' },
+    { label: 'Düşük Karbonhidrat', value: 'düşük karbonhidrat' },
+  ];
+
+  const handleGenerateRecipe = async () => {
+    if (!ingredients) {
+      setError('Lütfen en az bir malzeme girin');
       return;
     }
     
     setLoading(true);
+    setError(null);
+    
     try {
-      const response = await fetch('http://192.168.1.61:5001/api/ai/generate-recipe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ingredients: ingredients.split(','),
-          dietaryPreference: diet
-        })
+      const response = await axios.post(`${API_URL}/api/ai/generate-recipe`, {
+        ingredients: ingredients.split(',').map(item => item.trim()),
+        dietaryPreference
       });
       
-      const data = await response.json();
-      setRecipe(data.recipe);
+      setRecipe(response.data.recipe);
     } catch (error) {
-      alert('Tarif oluşturma hatası: ' + error.message);
+      console.error('Tarif oluşturma hatası:', error);
+      setError('Tarif oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!recipe) {
-      alert('Önce bir tarif oluşturun');
-      return;
-    }
+  const handleSaveRecipe = async () => {
+    if (!recipe) return;
     
     try {
-      const response = await fetch('http://192.168.1.61:5001/api/recipes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: "AI Tarifi: " + ingredients.split(',')[0],
-          ingredients: ingredients.split(','),
-          instructions: recipe.split('\n'),
-          aiDescription: recipe,
-          dietaryTags: [diet],
-          cookingTime: 30,
-          difficulty: 'Orta'
-        })
-      });
-      const data = await response.json();
-      alert('Tarif kaydedildi!');
+      // Tarifi parse et
+      const lines = recipe.split('\n');
+      const title = lines[0];
+      
+      // Malzemeler ve hazırlanışı bölümlerini bul
+      let ingredientsSection = '';
+      let instructionsSection = '';
+      let aiNotesSection = '';
+      
+      let currentSection = '';
+      for (const line of lines) {
+        if (line.includes('Malzemeler')) {
+          currentSection = 'ingredients';
+          continue;
+        } else if (line.includes('Hazırlanışı')) {
+          currentSection = 'instructions';
+          continue;
+        } else if (line.includes('AI Notları')) {
+          currentSection = 'aiNotes';
+          continue;
+        }
+        
+        if (currentSection === 'ingredients') {
+          ingredientsSection += line + '\n';
+        } else if (currentSection === 'instructions') {
+          instructionsSection += line + '\n';
+        } else if (currentSection === 'aiNotes') {
+          aiNotesSection += line + '\n';
+        }
+      }
+      
+      const recipeData = {
+        title,
+        ingredients: ingredientsSection.trim(),
+        instructions: instructionsSection.trim(),
+        aiDescription: aiNotesSection.trim(),
+        dietaryTags: [dietaryPreference],
+        cookingTime: '30 dakika', // Varsayılan değer
+        difficulty: 'Orta' // Varsayılan değer
+      };
+      
+      await axios.post(`${API_URL}/api/recipes`, recipeData);
+      alert('Tarif başarıyla kaydedildi!');
+      setRecipe(null);
+      setIngredients('');
     } catch (error) {
-      alert('Kaydetme hatası: ' + error.message);
+      console.error('Tarif kaydedilirken hata:', error);
+      alert('Tarif kaydedilirken bir hata oluştu.');
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Tarif Oluşturucu</Text>
-      
-      <Text style={styles.label}>Malzemeler</Text>
-      <TextInput
-        placeholder="Malzemeleri virgülle ayırın"
-        value={ingredients}
-        onChangeText={setIngredients}
-        style={styles.input}
-        multiline
-      />
-      
-      <Text style={styles.label}>Diyet Tercihi</Text>
-      <View style={styles.dietButtonsContainer}>
-        <TouchableOpacity 
-          style={[styles.dietButton, diet === 'vegan' && styles.dietButtonActive]}
-          onPress={() => setDiet('vegan')}>
-          <Text style={[styles.dietButtonEmoji, diet === 'vegan' && styles.dietButtonEmojiActive]}>🥗</Text>
-          <Text style={[styles.dietButtonText, diet === 'vegan' && styles.dietButtonTextActive]}>Vegan</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.dietButton, diet === 'gluten-free' && styles.dietButtonActive]}
-          onPress={() => setDiet('gluten-free')}>
-          <Text style={[styles.dietButtonEmoji, diet === 'gluten-free' && styles.dietButtonEmojiActive]}>🌾</Text>
-          <Text style={[styles.dietButtonText, diet === 'gluten-free' && styles.dietButtonTextActive]}>Glutensiz</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.dietButton, diet === 'protein' && styles.dietButtonActive]}
-          onPress={() => setDiet('protein')}>
-          <Text style={[styles.dietButtonEmoji, diet === 'protein' && styles.dietButtonEmojiActive]}>💪</Text>
-          <Text style={[styles.dietButtonText, diet === 'protein' && styles.dietButtonTextActive]}>Yüksek Protein</Text>
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Tarif Oluştur" 
-          onPress={generateRecipe} 
-          color="#4a90e2"
-          disabled={loading}
+    <View style={styles.container}>
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Malzemeler (virgülle ayırın)</Text>
+        <TextInput
+          style={styles.input}
+          value={ingredients}
+          onChangeText={setIngredients}
+          placeholder="Örn: domates, soğan, zeytinyağı"
+          multiline
+          numberOfLines={4}
         />
       </View>
       
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4a90e2" />
-          <Text style={styles.loadingText}>Tarif oluşturuluyor...</Text>
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Beslenme Tercihi</Text>
+        <TouchableOpacity 
+          style={styles.dropdownButton}
+          onPress={() => setShowPicker(true)}
+        >
+          <Text style={styles.dropdownButtonText}>
+            {dietaryOptions.find(option => option.value === dietaryPreference)?.label || 'Seçiniz'}
+          </Text>
+          <Text style={styles.dropdownIcon}>▼</Text>
+        </TouchableOpacity>
+      </View>
+      
+      <Modal
+        visible={showPicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPicker(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowPicker(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Beslenme Tercihi Seçin</Text>
+            {dietaryOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.optionItem,
+                  dietaryPreference === option.value && styles.selectedOption
+                ]}
+                onPress={() => {
+                  setDietaryPreference(option.value);
+                  setShowPicker(false);
+                }}
+              >
+                <Text 
+                  style={[
+                    styles.optionText,
+                    dietaryPreference === option.value && styles.selectedOptionText
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+      
+      <TouchableOpacity 
+        style={[styles.button, loading && styles.disabledButton]} 
+        onPress={handleGenerateRecipe}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? 'Tarif Oluşturuluyor...' : 'Tarif Oluştur'}
+        </Text>
+        {loading && <ActivityIndicator color="white" style={styles.loader} />}
+      </TouchableOpacity>
+      
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
       
-      {recipe ? (
+      {recipe && (
         <View style={styles.recipeContainer}>
-          <Text style={styles.recipeTitle}>Oluşturulan Tarif</Text>
-          <Text style={styles.recipeText}>{recipe}</Text>
-          <View style={styles.saveButtonContainer}>
-            <Button 
-              title="Tarifi Kaydet" 
-              onPress={handleSave} 
-              color="#28a745"
-            />
-          </View>
+          <ScrollView style={styles.recipeContent}>
+            {recipe.split('\n').map((line, index) => (
+              <Text key={index} style={styles.recipeLine}>{line}</Text>
+            ))}
+          </ScrollView>
+          
+          <TouchableOpacity 
+            style={[styles.button, styles.saveButton]} 
+            onPress={handleSaveRecipe}
+          >
+            <Text style={styles.buttonText}>Tarifi Kaydet</Text>
+          </TouchableOpacity>
         </View>
-      ) : null}
-    </ScrollView>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: 'white',
+    width: '100%',
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+  formGroup: {
     marginBottom: 16,
-    color: '#333',
   },
   label: {
     fontSize: 16,
+    fontWeight: '500',
     marginBottom: 8,
-    color: '#555',
+    color: '#333',
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 4,
+    borderRadius: 8,
     padding: 12,
-    marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    backgroundColor: 'white',
+    minHeight: 100,
+    textAlignVertical: 'top',
   },
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 4,
-    marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    backgroundColor: 'white',
   },
   picker: {
-    height: 150,  // iOS için yüksekliği artırdım
-    width: '100%'
-  },
-  pickerAndroid: {
     height: 50,
-    width: '100%'
   },
-  buttonContainer: {
-    marginBottom: 20,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  loadingText: {
-    marginTop: 10,
-    color: '#666',
-  },
-  recipeContainer: {
-    backgroundColor: '#f9f9f9',
-    padding: 16,
+  button: {
+    backgroundColor: '#4CAF50',
     borderRadius: 8,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: '#eee',
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
-  recipeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
+  disabledButton: {
+    backgroundColor: '#a5d6a7',
   },
-  recipeText: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: '#444',
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  saveButtonContainer: {
+  loader: {
+    marginLeft: 10,
+  },
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    padding: 12,
+    borderRadius: 8,
     marginTop: 16,
   },
-  dietButtonsContainer: {
+  errorText: {
+    color: '#c62828',
+    fontSize: 14,
+  },
+  recipeContainer: {
+    marginTop: 24,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
+    overflow: 'hidden',
+  },
+  recipeContent: {
+    padding: 16,
+    maxHeight: 300,
+  },
+  recipeLine: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+  saveButton: {
+    marginTop: 16,
+    backgroundColor: '#2196F3',
+    borderRadius: 0,
+  },
+  dropdownButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  dietButton: {
-    flex: 1,
-    padding: 12,
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 4,
-    marginHorizontal: 4,
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 14,
+    backgroundColor: 'white',
   },
-  dietButtonActive: {
-    backgroundColor: '#4a90e2',
-    borderColor: '#4a90e2',
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#333',
   },
-  dietButtonText: {
-    color: '#555',
-    fontWeight: '500',
+  dropdownIcon: {
+    fontSize: 14,
+    color: '#666',
   },
-  dietButtonTextActive: {
-    color: 'white',
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 20,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+    color: '#333',
+  },
+  optionItem: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  selectedOption: {
+    backgroundColor: '#e8f5e9',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  selectedOptionText: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
   },
 });
 

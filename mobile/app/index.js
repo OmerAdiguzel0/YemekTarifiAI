@@ -13,15 +13,10 @@ export default function HomeScreen() {
   const { currentUser, loading, logout } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && !currentUser) {
-      router.replace('/login');
-    }
-  }, [currentUser, loading]);
-
+  // Yönlendirme mantığı AuthContext'e taşındı, burada sadece logout işlemi kalıyor
   const handleLogout = async () => {
     await logout();
-    router.replace('/login');
+    // router.replace('/login'); - Bu satırı kaldırıyoruz, AuthContext otomatik yönlendirecek
   };
 
   if (loading) {
@@ -33,27 +28,25 @@ export default function HomeScreen() {
   }
 
   if (!currentUser) {
-    return null; // useEffect ile login sayfasına yönlendirilecek
+    return null; // AuthContext otomatik olarak login sayfasına yönlendirecek
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.welcomeText}>
-          Merhaba, {currentUser.username}
-        </Text>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Çıkış Yap</Text>
-        </TouchableOpacity>
-      </View>
-      
-      <Text style={styles.title}>AI Yemek Tarifi</Text>
+      {/* Header'ı geçici olarak kaldırıyoruz */}
       
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-        <RecipeGenerator />
-        <RecipeList />
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Tarif Oluşturucu</Text>
+          <RecipeGenerator />
+        </View>
+        
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Kaydedilmiş Tarifler</Text>
+          <RecipeList />
+        </View>
       </ScrollView>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </SafeAreaView>
   );
 }
@@ -64,39 +57,61 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#4CAF50',
-    padding: 16,
+    backgroundColor: '#4CAF50', // Yeşil renk
+    paddingTop: 50,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  userSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
   },
   welcomeText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
   logoutButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 4,
+    elevation: 2,
   },
   logoutText: {
     color: 'white',
-    fontWeight: '500',
-  },
-  title: {
-    fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 16,
-    color: '#333',
   },
   content: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 30,
+    padding: 16,
+  },
+  section: {
+    marginBottom: 24,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
   }
 });

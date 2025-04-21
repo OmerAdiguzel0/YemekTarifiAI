@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4CAF50', // Mavi yerine yeşil
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

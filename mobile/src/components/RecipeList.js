@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.61:5001'; // IP adresinizi buraya yazın
+// IP adresini güncelleyelim
+const API_URL = 'http://192.168.1.101:5001'; // Doğru IP adresi
 
 const RecipeList = () => {
   const [recipes, setRecipes] = useState([]);
@@ -16,7 +17,9 @@ const RecipeList = () => {
   const fetchRecipes = async () => {
     try {
       setLoading(true);
+      console.log('Tarifler yükleniyor...', `${API_URL}/api/recipes`); // Debug için log ekleyelim
       const response = await axios.get(`${API_URL}/api/recipes`);
+      console.log('Tarifler başarıyla yüklendi:', response.data); // Debug için log ekleyelim
       setRecipes(response.data);
       setError(null);
     } catch (error) {
@@ -56,46 +59,31 @@ const RecipeList = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Kaydedilmiş Tarifler</Text>
-      <FlatList
-        data={recipes}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.recipeCard}>
-            <Text style={styles.recipeTitle}>{item.title}</Text>
-            <View style={styles.recipeDetails}>
-              <Text style={styles.recipeInfo}>Zorluk: {item.difficulty || 'Orta'}</Text>
-              <Text style={styles.recipeInfo}>Süre: {item.cookingTime || '30 dakika'}</Text>
-            </View>
-            <View style={styles.tagContainer}>
-              {item.dietaryTags && item.dietaryTags.map((tag, index) => (
-                <View key={index} style={styles.tag}>
-                  <Text style={styles.tagText}>{tag}</Text>
-                </View>
-              ))}
-            </View>
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={styles.listContent}
-      />
-    </View>
+    <FlatList
+      data={recipes}
+      keyExtractor={(item) => item._id}
+      renderItem={({ item }) => (
+        <TouchableOpacity style={styles.recipeCard}>
+          <Text style={styles.recipeTitle}>{item.title}</Text>
+          <View style={styles.recipeDetails}>
+            <Text style={styles.recipeInfo}>Zorluk: {item.difficulty || 'Orta'}</Text>
+            <Text style={styles.recipeInfo}>Süre: {item.cookingTime || '30 dakika'}</Text>
+          </View>
+          <View style={styles.tagContainer}>
+            {item.dietaryTags && item.dietaryTags.map((tag, index) => (
+              <View key={index} style={styles.tag}>
+                <Text style={styles.tagText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        </TouchableOpacity>
+      )}
+      contentContainerStyle={styles.listContent}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-    marginTop: 10,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#333',
-  },
   listContent: {
     paddingBottom: 20,
   },
@@ -109,6 +97,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
   },
   recipeTitle: {
     fontSize: 18,
@@ -142,10 +132,8 @@ const styles = StyleSheet.create({
     color: '#00796b',
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    alignItems: 'center',
   },
   loadingText: {
     marginTop: 10,
@@ -153,10 +141,8 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    alignItems: 'center',
   },
   errorText: {
     fontSize: 16,
@@ -175,10 +161,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: 16,
