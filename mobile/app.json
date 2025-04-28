@@ -1,16 +1,10 @@
 {
   "expo": {
-    "name": "AI Yemek Tarifi",
-    "slug": "mobile",
+    "name": "YemekTarifiAI",
+    "slug": "YemekTarifiAI",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#4CAF50"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -19,24 +13,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#4CAF50"
+        "backgroundColor": "#ffffff"
       }
     },
-    "developmentClient": {
-      "silentLaunch": true
-    },
-    "web": {
-      "favicon": null,
-      "themeColor": "#4CAF50"
-    },
-    "plugins": [
-      "expo-router"
-    ],
-    "scheme": "aiyemektarifi",
-    "primaryColor": "#4CAF50",
-    "colors": {
-      "primary": "#4CAF50"
-    }
+    "scheme": "yemektarifiai"
   }
 }
