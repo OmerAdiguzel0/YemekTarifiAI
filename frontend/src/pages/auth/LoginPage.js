@@ -34,9 +34,15 @@ const LoginPage = () => {
             // Önce API'den token al
             const response = await authService.login({ email, sifre });
             
+            console.log('Login response:', response);
+            console.log('User data in response:', response.user);
+            
             if (response.token) {
                 // Token başarıyla alındıysa, oturumu başlat
-                await signIn();
+                if (!response.user) {
+                    throw new Error('Kullanıcı bilgileri alınamadı');
+                }
+                await signIn(response.user);
                 navigate('/');
             } else {
                 throw new Error('Token alınamadı');

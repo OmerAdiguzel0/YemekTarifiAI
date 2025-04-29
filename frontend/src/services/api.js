@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_URL = 'http://192.168.1.101:5002/api';
+import { API_URL } from '../config';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -31,11 +30,36 @@ export const authService = {
                 ...rest,
                 password: sifre
             });
+            
+            console.log('API login response:', response.data);
+            console.log('Response user data:', response.data.user);
+            
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
+                
+                // Kullanıcı bilgilerini kontrol et
+                if (!response.data.user) {
+                    console.error('Backend yanıtında kullanıcı bilgileri eksik');
+                    throw new Error('Kullanıcı bilgileri alınamadı');
+                }
+
+                if (!response.data.user.id) {
+                    console.error('Backend yanıtında kullanıcı ID eksik');
+                    throw new Error('Kullanıcı ID bilgisi alınamadı');
+                }
+                
+                const userData = {
+                    token: response.data.token,
+                    user: response.data.user
+                };
+                
+                console.log('Processed login data:', userData);
+                return userData;
             }
-            return response.data;
+            
+            throw new Error('Token alınamadı');
         } catch (error) {
+            console.error('Login error:', error);
             if (error.response) {
                 throw new Error(error.response.data.error || 'Giriş yapılırken bir hata oluştu');
             }

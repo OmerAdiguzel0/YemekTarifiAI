@@ -5,6 +5,8 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import HomePage from './pages/HomePage';
 import CreateRecipePage from './pages/recipes/CreateRecipePage';
+import SavedRecipesPage from './pages/recipes/SavedRecipesPage';
+import RecipeDetailPage from './pages/recipes/RecipeDetailPage';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
@@ -60,6 +62,22 @@ function App() {
                         element={
                             <PrivateRoute>
                                 <CreateRecipePage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/kaydedilen-tarifler"
+                        element={
+                            <PrivateRoute>
+                                <SavedRecipesPage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/tarif/:id"
+                        element={
+                            <PrivateRoute>
+                                <RecipeDetailPage />
                             </PrivateRoute>
                         }
                     />

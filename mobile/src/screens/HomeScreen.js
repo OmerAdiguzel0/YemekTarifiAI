@@ -8,8 +8,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../App';
-
-const API_URL = 'http://192.168.1.101:5002/api';
+import { API_URL } from '../config';
 
 export default function HomeScreen({ navigation }) {
     const { signOut } = useAuth();

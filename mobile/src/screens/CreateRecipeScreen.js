@@ -12,8 +12,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MultipleSelectList } from 'react-native-dropdown-select-list';
 import { useAuth } from '../../App';
-
-const API_URL = 'http://192.168.1.101:5002/api';
+import { API_URL } from '../config';
 
 const PREFERENCES = [
   { key: 'Vegan', value: 'Vegan' },

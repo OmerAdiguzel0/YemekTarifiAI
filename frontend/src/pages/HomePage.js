@@ -72,6 +72,32 @@ const HomePage = () => {
                         </Button>
                     </CardActions>
                 </Card>
+
+                <Card sx={{ maxWidth: 600, mx: 'auto', bgcolor: 'white', borderRadius: 2, boxShadow: 3, mt: 4 }}>
+                    <CardContent>
+                        <Typography variant="h5" component="h2" sx={{ color: '#1a237e', mb: 2 }}>
+                            Kaydedilen Tarifler
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#5c6bc0', mb: 2 }}>
+                            Daha önce kaydettiğiniz tarifleri görüntüleyin ve yönetin.
+                        </Typography>
+                    </CardContent>
+                    <CardActions sx={{ p: 2 }}>
+                        <Button 
+                            variant="contained" 
+                            fullWidth
+                            sx={{ 
+                                bgcolor: '#2196f3',
+                                '&:hover': {
+                                    bgcolor: '#1976d2'
+                                }
+                            }}
+                            onClick={() => navigate('/kaydedilen-tarifler')}
+                        >
+                            Kaydedilen Tarifleri Görüntüle
+                        </Button>
+                    </CardActions>
+                </Card>
             </Container>
         </Box>
     );

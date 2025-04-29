@@ -14,8 +14,7 @@ import {
 import { authService } from '../../services/api';
 import { useAuth } from '../../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API_URL = 'http://192.168.1.101:5002/api';
+import { API_URL } from '../../config';
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');

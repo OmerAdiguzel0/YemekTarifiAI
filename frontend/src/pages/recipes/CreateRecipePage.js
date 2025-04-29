@@ -20,8 +20,8 @@ import {
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
-const API_URL = 'http://192.168.1.101:5002/api';
+import { API_URL } from '../../config';
+import { useAuth } from '../../contexts/AuthContext';
 
 const PREFERENCES = [
   { value: 'Vegan', label: 'Vegan' },
@@ -34,6 +34,7 @@ const PREFERENCES = [
 
 const CreateRecipePage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [ingredients, setIngredients] = useState('');
   const [selectedPreferences, setSelectedPreferences] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -86,6 +87,51 @@ const CreateRecipePage = () => {
       console.error('Error generating recipe:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveRecipe = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/giris');
+        return;
+      }
+
+      if (!user || (!user._id && !user.id)) {
+        console.error('User data is invalid:', user);
+        setError('Kullanıcı bilgileri bulunamadı. Lütfen tekrar giriş yapın.');
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/recipe/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ingredients: ingredients.split(',').map(item => item.trim()).filter(item => item),
+          preferences: selectedPreferences.map(pref => pref.value),
+          generatedRecipe: generatedRecipe
+        })
+      });
+
+      if (response.status === 403) {
+        localStorage.removeItem('token');
+        navigate('/giris');
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Tarif kaydedilirken bir hata oluştu');
+      }
+
+      navigate('/kaydedilen-tarifler');
+    } catch (error) {
+      setError(error.message || 'Tarif kaydedilirken bir hata oluştu.');
+      console.error('Error saving recipe:', error);
     }
   };
 
@@ -248,20 +294,34 @@ const CreateRecipePage = () => {
             </Box>
           )}
 
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleNewRecipe}
-            sx={{
-              mt: 2,
-              bgcolor: '#4caf50',
-              '&:hover': { bgcolor: '#388e3c' },
-              py: 1.5,
-              fontSize: '1rem'
-            }}
-          >
-            Yeni Tarif Oluştur
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleNewRecipe}
+              sx={{
+                bgcolor: '#4caf50',
+                '&:hover': { bgcolor: '#388e3c' },
+                py: 1.5,
+                fontSize: '1rem'
+              }}
+            >
+              Yeni Tarif Oluştur
+            </Button>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleSaveRecipe}
+              sx={{
+                bgcolor: '#2196f3',
+                '&:hover': { bgcolor: '#1976d2' },
+                py: 1.5,
+                fontSize: '1rem'
+              }}
+            >
+              Tarifi Kaydet
+            </Button>
+          </Box>
         </Paper>
       )}
     </Container>
