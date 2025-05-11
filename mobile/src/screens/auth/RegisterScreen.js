@@ -27,7 +27,11 @@ const RegisterScreen = ({ navigation }) => {
         try {
             setLoading(true);
             console.log('Kayıt isteği gönderiliyor:', { kullaniciAdi, email, sifre });
-            const response = await authService.register({ kullaniciAdi, email, sifre });
+            const response = await authService.register({
+                username: kullaniciAdi,
+                email,
+                password: sifre
+            });
             console.log('Kayıt başarılı:', response);
             navigation.navigate('Login');
         } catch (error) {

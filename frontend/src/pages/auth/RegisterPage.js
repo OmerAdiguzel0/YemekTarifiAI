@@ -48,7 +48,11 @@ const RegisterPage = () => {
         try {
             setLoading(true);
             setError('');
-            await authService.register({ ad, soyad, email, sifre });
+            await authService.register({
+                username: ad + ' ' + soyad,
+                email,
+                password: sifre
+            });
             navigate('/giris');
         } catch (error) {
             console.error('Kayıt hatası:', error);
