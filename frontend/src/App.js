@@ -29,7 +29,7 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
-    return (
+  return (
         <Router>
             <AuthProvider>
                 <Routes>
@@ -84,7 +84,7 @@ function App() {
                 </Routes>
             </AuthProvider>
         </Router>
-    );
+  );
 }
 
 export default App;

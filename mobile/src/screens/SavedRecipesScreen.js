@@ -13,6 +13,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../App';
 import { API_URL } from '../config';
+import { useFocusEffect } from '@react-navigation/native';
 
 const showAlert = (title, message, buttons) => {
   if (Platform.OS === 'ios') {
@@ -27,7 +28,7 @@ const showAlert = (title, message, buttons) => {
   }
 };
 
-const SavedRecipesScreen = ({ navigation }) => {
+const SavedRecipesScreen = ({ navigation, route }) => {
   const { signOut } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +42,7 @@ const SavedRecipesScreen = ({ navigation }) => {
         throw new Error('Oturum bulunamadı');
       }
 
-      const response = await fetch(`${API_URL}/recipe/user-recipes`, {
+      const response = await fetch(`${API_URL}/recipes/saved`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -58,8 +59,8 @@ const SavedRecipesScreen = ({ navigation }) => {
       }
 
       const data = await response.json();
-      console.log('Received recipes:', JSON.stringify(data.recipes, null, 2));
-      setRecipes(data.recipes);
+      console.log('Received recipes:', JSON.stringify(data, null, 2));
+      setRecipes(data);
     } catch (error) {
       Alert.alert('Hata', error.message || 'Tarifler yüklenirken bir hata oluştu');
       console.error('Error fetching recipes:', error);
@@ -89,7 +90,7 @@ const SavedRecipesScreen = ({ navigation }) => {
         return;
       }
 
-      const deleteUrl = `${API_URL}/recipe/${recipeId}`;
+      const deleteUrl = `${API_URL}/recipes/saved/${recipeId}`;
       console.log('Sending DELETE request to:', deleteUrl);
       console.log('Using token:', token);
 
@@ -112,18 +113,19 @@ const SavedRecipesScreen = ({ navigation }) => {
       }
 
       if (!response.ok) {
-        console.log('Delete request failed:', response.status, responseText);
+        const errorData = JSON.parse(responseText);
+        Alert.alert('Hata', errorData.error || 'Tarif silinirken bir hata oluştu');
         return;
       }
 
       console.log('Delete successful, updating recipes state');
       setRecipes(prevRecipes => {
         console.log('Previous recipes count:', prevRecipes.length);
-        const newRecipes = prevRecipes.filter(recipe => recipe._id !== recipeId);
+        const newRecipes = prevRecipes.filter(recipe => recipe.savedRecipeId !== recipeId);
         console.log('New recipes count:', newRecipes.length);
         return newRecipes;
       });
-      
+      Alert.alert('Başarılı', 'Tarif başarıyla silindi');
     } catch (error) {
       console.error('Error in handleDeleteRecipe:', error);
     } finally {
@@ -135,6 +137,15 @@ const SavedRecipesScreen = ({ navigation }) => {
   useEffect(() => {
     fetchRecipes();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params?.refresh) {
+        fetchRecipes();
+        setTimeout(() => navigation.setParams({ refresh: false }), 0);
+      }
+    }, [route.params?.refresh])
+  );
 
   if (loading) {
     return (
@@ -161,43 +172,55 @@ const SavedRecipesScreen = ({ navigation }) => {
             >
               <Text style={styles.buttonText}>Yeni Tarif Oluştur</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.createButton, { backgroundColor: '#28a745', marginTop: 12 }]}
+              onPress={() => navigation.navigate('CommunityRecipes')}
+            >
+              <Text style={styles.buttonText}>Topluluk Tariflerine Göz At</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           recipes.map((recipe, index) => {
             console.log('Rendering recipe:', JSON.stringify(recipe, null, 2));
-            let recipeTitle;
-            try {
-              if (typeof recipe.generatedRecipe === 'string') {
-                const parsed = JSON.parse(recipe.generatedRecipe);
-                recipeTitle = parsed.title;
-              } else if (recipe.generatedRecipe && recipe.generatedRecipe.title) {
-                recipeTitle = recipe.generatedRecipe.title;
-              } else {
-                recipeTitle = 'Başlıksız Tarif';
+            let recipeTitle = 'Başlıksız Tarif';
+            let ingredients = recipe.ingredients || [];
+            let preferences = recipe.preferences || [];
+            if (recipe.type === 'ai') {
+              try {
+                if (typeof recipe.generatedRecipe === 'string') {
+                  const parsed = JSON.parse(recipe.generatedRecipe);
+                  recipeTitle = parsed.title;
+                  ingredients = parsed.ingredients || recipe.ingredients || [];
+                  preferences = recipe.preferences || [];
+                } else if (recipe.generatedRecipe && recipe.generatedRecipe.title) {
+                  recipeTitle = recipe.generatedRecipe.title;
+                  ingredients = recipe.generatedRecipe.ingredients || recipe.ingredients || [];
+                  preferences = recipe.preferences || [];
+                }
+              } catch (error) {
+                console.error('Error parsing recipe:', error);
               }
-            } catch (error) {
-              console.error('Error parsing recipe:', error);
-              recipeTitle = 'Başlıksız Tarif';
+            } else if (recipe.type === 'community') {
+              recipeTitle = recipe.title || 'Başlıksız Tarif';
+              ingredients = recipe.ingredients || [];
+              preferences = recipe.preferences || [];
             }
 
             return (
               <View key={recipe._id || index} style={styles.recipeCard}>
                 <Text style={styles.recipeTitle}>{recipeTitle}</Text>
-                
                 <Text style={styles.sectionTitle}>Malzemeler:</Text>
-                {recipe.ingredients.map((ingredient, idx) => (
+                {ingredients.map((ingredient, idx) => (
                   <Text key={idx} style={styles.ingredient}>• {ingredient}</Text>
                 ))}
-
                 <Text style={styles.sectionTitle}>Tercihler:</Text>
                 <View style={styles.preferencesContainer}>
-                  {recipe.preferences.map((preference, idx) => (
+                  {preferences.map((preference, idx) => (
                     <View key={idx} style={styles.preferenceTag}>
                       <Text style={styles.preferenceText}>{preference}</Text>
                     </View>
                   ))}
                 </View>
-
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={styles.viewButton}
@@ -224,9 +247,9 @@ const SavedRecipesScreen = ({ navigation }) => {
                     style={[styles.deleteButton, { marginTop: 8 }]}
                     activeOpacity={0.7}
                     onPress={async () => {
-                      console.log('Delete button pressed for recipe:', recipe._id);
+                      console.log('Delete button pressed for recipe:', recipe.savedRecipeId);
                       try {
-                        await handleDeleteRecipe(recipe._id);
+                        await handleDeleteRecipe(recipe.savedRecipeId);
                       } catch (error) {
                         console.error('Error in delete handler:', error);
                       }

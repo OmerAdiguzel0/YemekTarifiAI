@@ -83,6 +83,7 @@ const CreateRecipeScreen = ({ navigation }) => {
         throw new Error('Oturum bulunamadı');
       }
 
+      // Önce tarifi oluştur
       const saveResponse = await fetch(`${API_URL}/recipe/create`, {
         method: 'POST',
         headers: {
@@ -100,6 +101,25 @@ const CreateRecipeScreen = ({ navigation }) => {
         const errorData = await saveResponse.json();
         console.error('Tarif kaydetme hatası:', await saveResponse.text());
         throw new Error(errorData.error || 'Tarif kaydedilemedi');
+      }
+
+      const createdRecipe = await saveResponse.json();
+      const recipeId = createdRecipe._id || createdRecipe.recipe?._id;
+      // Sonra favorilere ekle
+      const favResponse = await fetch(`${API_URL}/recipes/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipeId,
+          type: 'ai'
+        })
+      });
+      if (!favResponse.ok) {
+        const errorData = await favResponse.json();
+        throw new Error(errorData.error || 'Favorilere eklenemedi');
       }
 
       Alert.alert('Başarılı', 'Tarif başarıyla kaydedildi!');

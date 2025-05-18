@@ -10,6 +10,11 @@ import HomeScreen from './src/screens/HomeScreen';
 import CreateRecipeScreen from './src/screens/CreateRecipeScreen';
 import SavedRecipesScreen from './src/screens/SavedRecipesScreen';
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
+import CommunityRecipesScreen from './src/screens/CommunityRecipesScreen';
+import CommunityRecipeDetailScreen from './src/screens/CommunityRecipeDetailScreen';
+import CommunityRecipeShareScreen from './src/screens/CommunityRecipeShareScreen';
+import MyCommunityRecipesScreen from './src/screens/MyCommunityRecipesScreen';
+import EditCommunityRecipeScreen from './src/screens/EditCommunityRecipeScreen';
 
 const Stack = createNativeStackNavigator();
 const AuthContext = createContext();
@@ -107,6 +112,51 @@ export default function App() {
                                 options={{
                                     headerShown: true,
                                     title: 'Tarif Detayı',
+                                    ...commonHeaderStyle
+                                }}
+                            />
+                            <Stack.Screen 
+                                name="CommunityRecipes" 
+                                component={CommunityRecipesScreen}
+                                options={{
+                                    headerShown: true,
+                                    title: 'Topluluk Tarifleri',
+                                    ...commonHeaderStyle
+                                }}
+                            />
+                            <Stack.Screen 
+                                name="CommunityRecipeDetail" 
+                                component={CommunityRecipeDetailScreen}
+                                options={{
+                                    headerShown: true,
+                                    title: 'Tarif Detayı',
+                                    ...commonHeaderStyle
+                                }}
+                            />
+                            <Stack.Screen 
+                                name="CommunityRecipeShare" 
+                                component={CommunityRecipeShareScreen}
+                                options={{
+                                    headerShown: true,
+                                    title: 'Tarif Paylaş',
+                                    ...commonHeaderStyle
+                                }}
+                            />
+                            <Stack.Screen 
+                                name="MyCommunityRecipes" 
+                                component={MyCommunityRecipesScreen}
+                                options={{
+                                    headerShown: true,
+                                    title: 'Tariflerim',
+                                    ...commonHeaderStyle
+                                }}
+                            />
+                            <Stack.Screen 
+                                name="EditCommunityRecipe" 
+                                component={EditCommunityRecipeScreen}
+                                options={{
+                                    headerShown: true,
+                                    title: 'Tarifi Düzenle',
                                     ...commonHeaderStyle
                                 }}
                             />

@@ -8,6 +8,7 @@ require('dotenv').config();
 const auth = require('./routes/auth');
 const recipe = require('./routes/recipe');
 const recipes = require('./routes/recipes');
+const communityRecipesRouter = require('./routes/communityRecipes');
 
 const app = express();
 
@@ -28,6 +29,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/auth', auth);
 app.use('/api/recipe', recipe);
 app.use('/api/recipes', recipes);
+app.use('/api/community/recipes', communityRecipesRouter);
 
 // Hata yakalama middleware'i
 app.use((err, req, res, next) => {

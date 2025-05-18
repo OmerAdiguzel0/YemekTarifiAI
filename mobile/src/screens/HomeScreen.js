@@ -60,6 +60,10 @@ export default function HomeScreen({ navigation }) {
                     <Text style={styles.buttonText}>Yeni Tarif Oluştur</Text>
                 </TouchableOpacity>
 
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('CommunityRecipes')}>
+                    <Text style={styles.buttonText}>Topluluk Tarifleri</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                     style={[styles.button, styles.savedRecipesButton]}
                     onPress={() => navigation.navigate('SavedRecipes')}
@@ -73,6 +77,8 @@ export default function HomeScreen({ navigation }) {
                 >
                     <Text style={styles.buttonText}>Çıkış Yap</Text>
                 </TouchableOpacity>
+
+                
             </View>
         </View>
     );

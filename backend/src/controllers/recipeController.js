@@ -1,5 +1,6 @@
 const Recipe = require('../models/Recipe');
 const { generateRecipe: generateRecipeService } = require('../services/geminiService');
+const mongoose = require('mongoose');
 
 const generateRecipe = async (req, res) => {
     try {
@@ -38,7 +39,7 @@ const createRecipe = async (req, res) => {
         }
 
         const recipe = new Recipe({
-            userId: userId,
+            userId: new mongoose.Types.ObjectId(userId),
             ingredients,
             preferences,
             generatedRecipe
@@ -59,7 +60,7 @@ const getUserRecipes = async (req, res) => {
         const userId = req.user.userId;
 
         console.log('Fetching recipes for userId:', userId);
-        const recipes = await Recipe.find({ userId })
+        const recipes = await Recipe.find({ userId: new mongoose.Types.ObjectId(userId) })
             .sort({ createdAt: -1 });
 
         console.log('Found recipes:', JSON.stringify(recipes, null, 2));
@@ -80,7 +81,7 @@ const deleteRecipe = async (req, res) => {
 
         console.log('Delete request received for:', { recipeId, userId });
 
-        const recipe = await Recipe.findOne({ _id: recipeId, userId });
+        const recipe = await Recipe.findOne({ _id: recipeId, userId: new mongoose.Types.ObjectId(userId) });
         console.log('Found recipe:', recipe);
         
         if (!recipe) {
@@ -88,7 +89,7 @@ const deleteRecipe = async (req, res) => {
             return res.status(404).json({ error: 'Tarif bulunamadı' });
         }
 
-        const result = await Recipe.deleteOne({ _id: recipeId, userId });
+        const result = await Recipe.deleteOne({ _id: recipeId, userId: new mongoose.Types.ObjectId(userId) });
         console.log('Delete result:', result);
 
         if (result.deletedCount === 0) {

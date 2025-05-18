@@ -82,4 +82,89 @@ export const recipeService = {
             throw error.response?.data || { error: 'Tarifler getirilirken bir hata oluştu' };
         }
     }
+};
+
+// Topluluk tariflerini listele
+export const getCommunityRecipes = async () => {
+    try {
+        const response = await api.get('/community/recipes');
+        return response.data;
+    } catch (error) {
+        console.error('getCommunityRecipes error:', error.response?.data || error.message);
+        throw error.response?.data || { error: 'Topluluk tarifleri alınamadı' };
+    }
+};
+
+// Yeni topluluk tarifi oluştur
+export const createCommunityRecipe = async (recipeData) => {
+    try {
+        const response = await api.post('/community/recipes', recipeData);
+        return response.data;
+    } catch (error) {
+        console.error('createCommunityRecipe error:', error.response?.data || error.message);
+        throw error.response?.data || { error: 'Tarif oluşturulamadı' };
+    }
+};
+
+// Tarifi beğen
+export const likeCommunityRecipe = async (recipeId) => {
+    try {
+        const response = await api.post(`/community/recipes/${recipeId}/like`);
+        return response.data;
+    } catch (error) {
+        console.error('likeCommunityRecipe error:', error.response?.data || error.message);
+        throw error.response?.data || { error: 'Tarif beğenilemedi' };
+    }
+};
+
+// Tarifi kaydet
+export const saveCommunityRecipe = async (recipeId) => {
+    try {
+        const response = await api.post(`/community/recipes/${recipeId}/save`);
+        return response.data;
+    } catch (error) {
+        console.error('saveCommunityRecipe error:', error.response?.data || error.message);
+        throw error.response?.data || { error: 'Tarif kaydedilemedi' };
+    }
+};
+
+// Kendi topluluk tariflerini getir
+export const getMyCommunityRecipes = async () => {
+    try {
+        const response = await api.get('/community/recipes/mine');
+        return response.data;
+    } catch (error) {
+        console.error('getMyCommunityRecipes error:', error.response?.data || error.message);
+        throw error.response?.data || { error: 'Kendi topluluk tariflerin alınamadı' };
+    }
+};
+
+// Topluluk tarifini güncelle
+export const updateCommunityRecipe = async (id, data) => {
+    try {
+        const response = await api.put(`/community/recipes/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.error('updateCommunityRecipe error:', error.response?.data || error.message);
+        throw error.response?.data || { error: 'Tarif güncellenemedi' };
+    }
+};
+
+// Topluluk tarifini sil
+export const deleteCommunityRecipe = async (id) => {
+    try {
+        console.log('deleteCommunityRecipe çağrıldı, ID:', id);
+        console.log('API URL:', `${API_URL}/community/recipes/${id}`);
+        const response = await api.delete(`/community/recipes/${id}`);
+        console.log('API yanıtı:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('deleteCommunityRecipe hatası:', error);
+        console.error('Hata detayları:', {
+            response: error.response?.data,
+            status: error.response?.status,
+            message: error.message
+        });
+        throw error.response?.data || { error: 'Tarif silinemedi' };
+    }
 }; 

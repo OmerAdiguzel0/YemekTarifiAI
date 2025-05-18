@@ -4,7 +4,7 @@ const {
     login,
     logout
 } = require('../controllers/authController');
-const { authenticateToken } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.post('/login', login);
 router.get('/logout', logout);
 
 // Token doğrulama endpoint'i
-router.get('/verify', authenticateToken, (req, res) => {
+router.get('/verify', auth, (req, res) => {
     res.json({ message: 'Token geçerli' });
 });
 

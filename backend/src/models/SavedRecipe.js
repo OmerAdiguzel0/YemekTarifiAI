@@ -6,21 +6,15 @@ const savedRecipeSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    title: {
-        type: String,
+    recipeId: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true
     },
-    ingredients: [{
+    type: {
         type: String,
+        enum: ['ai', 'community'],
         required: true
-    }],
-    instructions: [{
-        type: String,
-        required: true
-    }],
-    tips: [{
-        type: String
-    }],
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -28,6 +22,6 @@ const savedRecipeSchema = new mongoose.Schema({
 });
 
 // Bir kullanıcının aynı tarifi birden fazla kez kaydetmesini önlemek için bileşik indeks
-savedRecipeSchema.index({ userId: 1, title: 1 }, { unique: true });
+savedRecipeSchema.index({ userId: 1, recipeId: 1, type: 1 }, { unique: true });
 
 module.exports = mongoose.model('SavedRecipe', savedRecipeSchema); 

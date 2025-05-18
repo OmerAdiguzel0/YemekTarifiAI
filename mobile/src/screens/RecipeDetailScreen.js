@@ -11,23 +11,48 @@ import {
 const RecipeDetailScreen = ({ route, navigation }) => {
   const { recipe } = route.params;
 
+  // AI ve community ayrımı
+  const isAIRecipe = !!recipe.generatedRecipe;
+  let title, ingredients, instructions, tips, preferences;
+  if (isAIRecipe) {
+    let gen = recipe.generatedRecipe;
+    if (typeof gen === 'string') {
+      try {
+        gen = JSON.parse(gen);
+      } catch (e) {
+        gen = {};
+      }
+    }
+    title = gen.title || 'Başlıksız Tarif';
+    ingredients = gen.ingredients || recipe.ingredients || [];
+    instructions = gen.instructions || [];
+    tips = gen.tips || [];
+    preferences = recipe.preferences || [];
+  } else {
+    title = recipe.title || 'Başlıksız Tarif';
+    ingredients = recipe.ingredients || [];
+    instructions = recipe.steps || [];
+    tips = [];
+    preferences = recipe.preferences || [];
+  }
+
   const handleShare = async () => {
     try {
       const recipeText = `
-${recipe.generatedRecipe.title}
+${title}
 
 Malzemeler:
-${recipe.ingredients.map(ingredient => `• ${ingredient}`).join('\n')}
+${ingredients.map(ingredient => `• ${ingredient}`).join('\n')}
 
 Hazırlanışı:
-${recipe.generatedRecipe.instructions.map((instruction, index) => `${index + 1}. ${instruction}`).join('\n')}
+${instructions.map((instruction, index) => `${index + 1}. ${instruction}`).join('\n')}
 
-${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.tips.map(tip => `💡 ${tip}`).join('\n')}` : ''}
+${tips && tips.length > 0 ? `\nPüf Noktaları:\n${tips.map(tip => `💡 ${tip}`).join('\n')}` : ''}
       `.trim();
 
       await Share.share({
         message: recipeText,
-        title: recipe.generatedRecipe.title
+        title: title
       });
     } catch (error) {
       console.error('Error sharing recipe:', error);
@@ -37,10 +62,10 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>{recipe.generatedRecipe.title}</Text>
+        <Text style={styles.title}>{title}</Text>
 
         <View style={styles.preferencesContainer}>
-          {recipe.preferences.map((preference, index) => (
+          {preferences.map((preference, index) => (
             <View key={index} style={styles.preferenceTag}>
               <Text style={styles.preferenceText}>{preference}</Text>
             </View>
@@ -48,21 +73,21 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
         </View>
 
         <Text style={styles.sectionTitle}>Malzemeler</Text>
-        {recipe.ingredients.map((ingredient, index) => (
+        {ingredients.map((ingredient, index) => (
           <Text key={index} style={styles.ingredient}>• {ingredient}</Text>
         ))}
 
-        <Text style={styles.sectionTitle}>Hazırlanışı</Text>
-        {recipe.generatedRecipe.instructions.map((instruction, index) => (
+        <Text style={styles.sectionTitle}>{isAIRecipe ? 'Hazırlanışı' : 'Yapılış Adımları'}</Text>
+        {instructions.map((instruction, index) => (
           <Text key={index} style={styles.instruction}>
-            {index + 1}. {instruction}
+            {isAIRecipe ? `${index + 1}. ` : ''}{instruction}
           </Text>
         ))}
 
-        {recipe.generatedRecipe.tips && recipe.generatedRecipe.tips.length > 0 && (
+        {isAIRecipe && tips && tips.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Püf Noktaları</Text>
-            {recipe.generatedRecipe.tips.map((tip, index) => (
+            {tips.map((tip, index) => (
               <Text key={index} style={styles.tip}>💡 {tip}</Text>
             ))}
           </>

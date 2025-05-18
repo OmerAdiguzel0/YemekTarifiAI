@@ -1,11 +1,11 @@
 const express = require('express');
 const { generateRecipe, createRecipe, getUserRecipes, deleteRecipe } = require('../controllers/recipeController');
-const { authenticateToken } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
 // Tüm route'lar için authentication gerekli
-router.use(authenticateToken);
+router.use(auth);
 
 router.post('/generate', generateRecipe);
 router.post('/create', createRecipe);
