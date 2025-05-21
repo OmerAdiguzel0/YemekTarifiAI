@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -27,6 +27,7 @@ import { API_URL } from '../../config';
 
 const SavedRecipesPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,8 +35,14 @@ const SavedRecipesPage = () => {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   useEffect(() => {
-    fetchSavedRecipes();
-  }, []);
+    if (location.state?.refresh) {
+      fetchSavedRecipes();
+      // State'i temizle
+      window.history.replaceState({}, document.title);
+    } else {
+      fetchSavedRecipes();
+    }
+  }, [location]);
 
   const fetchSavedRecipes = async () => {
     try {
@@ -45,7 +52,7 @@ const SavedRecipesPage = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/recipe/user-recipes`, {
+      const response = await fetch(`${API_URL}/recipes/saved`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -62,8 +69,7 @@ const SavedRecipesPage = () => {
       }
 
       const data = await response.json();
-      console.log('Saved recipes response:', data);
-      setRecipes(data.recipes || []);
+      setRecipes(data || []);
     } catch (error) {
       setError(error.message);
       console.error('Error fetching recipes:', error);
@@ -84,7 +90,7 @@ const SavedRecipesPage = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/recipe/${recipeId}`, {
+      const response = await fetch(`${API_URL}/recipes/saved/${recipeId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -101,7 +107,7 @@ const SavedRecipesPage = () => {
         throw new Error('Tarif silinirken bir hata oluştu');
       }
 
-      setRecipes(prevRecipes => prevRecipes.filter(recipe => recipe._id !== recipeId));
+      setRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.savedRecipeId !== recipeId));
     } catch (error) {
       setError(error.message);
       console.error('Error deleting recipe:', error);
@@ -144,81 +150,122 @@ const SavedRecipesPage = () => {
           <Typography variant="h6" color="text.secondary" gutterBottom>
             Henüz kaydedilmiş tarifiniz bulunmuyor.
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate('/tarif-olustur')}
-            sx={{ mt: 2 }}
-          >
-            Yeni Tarif Oluştur
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate('/tarif-olustur')}
+            >
+              Yeni Tarif Oluştur
+            </Button>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => navigate('/topluluk-tarifleri')}
+            >
+              Topluluk Tariflerine Göz At
+            </Button>
+          </Box>
         </Paper>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {recipes.map((recipe) => (
-            <Card 
-              key={recipe._id}
-              elevation={3}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 6
+          {recipes.map((recipe) => {
+            let recipeTitle = 'Başlıksız Tarif';
+            let ingredients = recipe.ingredients || [];
+            let preferences = recipe.preferences || [];
+
+            if (recipe.type === 'ai') {
+              try {
+                if (typeof recipe.generatedRecipe === 'string') {
+                  const parsed = JSON.parse(recipe.generatedRecipe);
+                  recipeTitle = parsed.title;
+                  ingredients = parsed.ingredients || recipe.ingredients || [];
+                  preferences = recipe.preferences || [];
+                } else if (recipe.generatedRecipe && recipe.generatedRecipe.title) {
+                  recipeTitle = recipe.generatedRecipe.title;
+                  ingredients = recipe.generatedRecipe.ingredients || recipe.ingredients || [];
+                  preferences = recipe.preferences || [];
                 }
-              }}
-              onClick={() => navigate(`/tarif/${recipe._id}`, { state: { recipe } })}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <RestaurantIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6" component="h2" color="primary.main" sx={{ flex: 1 }}>
-                    {recipe.generatedRecipe.title}
-                  </Typography>
-                  <IconButton
-                    onClick={(e) => handleDeleteRecipe(recipe._id, e)}
-                    disabled={deleting}
-                    sx={{ 
-                      color: 'error.main',
-                      '&:hover': {
-                        bgcolor: 'error.light',
-                        color: 'error.dark'
-                      },
-                      '&.Mui-disabled': {
-                        color: 'grey.400'
-                      }
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
+              } catch (error) {
+                console.error('Error parsing recipe:', error);
+              }
+            } else if (recipe.type === 'community') {
+              recipeTitle = recipe.title || 'Başlıksız Tarif';
+              ingredients = recipe.ingredients || [];
+              preferences = recipe.preferences || [];
+            }
 
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                    Malzemeler:
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ pl: 2 }}>
-                    {recipe.ingredients.slice(0, 3).join(', ')}
-                    {recipe.ingredients.length > 3 && '...'}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {recipe.preferences.map((preference, index) => (
-                    <Chip
-                      key={index}
-                      label={preference}
-                      size="small"
-                      variant="outlined"
-                      color="primary"
+            return (
+              <Card 
+                key={recipe._id}
+                elevation={3}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 6
+                  }
+                }}
+                onClick={() => navigate(`/tarif/${recipe._id}`, { state: { recipe } })}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <RestaurantIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography variant="h6" component="h2" color="primary.main" sx={{ flex: 1 }}>
+                      {recipeTitle}
+                    </Typography>
+                    <Chip 
+                      label={recipe.type === 'ai' ? 'AI Tarifi' : 'Topluluk Tarifi'} 
+                      size="small" 
+                      color={recipe.type === 'ai' ? 'primary' : 'success'}
+                      sx={{ mr: 1 }}
                     />
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
+                    <IconButton
+                      onClick={(e) => handleDeleteRecipe(recipe.savedRecipeId, e)}
+                      disabled={deleting}
+                      sx={{ 
+                        color: 'error.main',
+                        '&:hover': {
+                          bgcolor: 'error.light',
+                          color: 'error.dark'
+                        },
+                        '&.Mui-disabled': {
+                          color: 'grey.400'
+                        }
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                      Malzemeler:
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ pl: 2 }}>
+                      {ingredients.slice(0, 3).join(', ')}
+                      {ingredients.length > 3 && '...'}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {preferences.map((preference, index) => (
+                      <Chip
+                        key={index}
+                        label={preference}
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                      />
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            );
+          })}
         </Box>
       )}
 

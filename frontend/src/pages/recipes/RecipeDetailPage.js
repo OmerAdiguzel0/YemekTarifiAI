@@ -61,7 +61,7 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
 
   let parsedRecipe = recipe;
   try {
-    if (typeof recipe.generatedRecipe === 'string') {
+    if (recipe.type === 'ai' && typeof recipe.generatedRecipe === 'string') {
       parsedRecipe = {
         ...recipe,
         generatedRecipe: JSON.parse(recipe.generatedRecipe)
@@ -69,6 +69,24 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
     }
   } catch (error) {
     console.error('Error parsing recipe:', error);
+  }
+
+  const isAIRecipe = recipe.type === 'ai' || !!parsedRecipe.generatedRecipe;
+
+  let title, ingredients, instructions, tips, preferences;
+  if (isAIRecipe) {
+    const gen = parsedRecipe.generatedRecipe || {};
+    title = gen.title || 'Başlıksız Tarif';
+    ingredients = gen.ingredients || recipe.ingredients || [];
+    instructions = gen.instructions || [];
+    tips = gen.tips || [];
+    preferences = recipe.preferences || [];
+  } else {
+    title = recipe.title || 'Başlıksız Tarif';
+    ingredients = recipe.ingredients || [];
+    instructions = recipe.instructions || recipe.steps || [];
+    tips = [];
+    preferences = recipe.preferences || [];
   }
 
   return (
@@ -79,7 +97,7 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h4" component="h1" sx={{ flex: 1 }}>
-            {parsedRecipe.generatedRecipe.title}
+            {title}
           </Typography>
           <IconButton onClick={handleShare} color="primary">
             <ShareIcon />
@@ -87,7 +105,7 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
         </Box>
 
         <Box sx={{ mb: 4, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {parsedRecipe.preferences.map((preference, index) => (
+          {preferences.map((preference, index) => (
             <Chip
               key={index}
               label={preference}
@@ -101,7 +119,7 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
           Malzemeler
         </Typography>
         <List sx={{ mb: 4 }}>
-          {parsedRecipe.ingredients.map((ingredient, index) => (
+          {ingredients.map((ingredient, index) => (
             <ListItem key={index}>
               <ListItemText primary={`• ${ingredient}`} />
             </ListItem>
@@ -112,20 +130,20 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
           Hazırlanışı
         </Typography>
         <List sx={{ mb: 4 }}>
-          {parsedRecipe.generatedRecipe.instructions.map((instruction, index) => (
+          {instructions.map((instruction, index) => (
             <ListItem key={index}>
               <ListItemText primary={`${index + 1}. ${instruction}`} />
             </ListItem>
           ))}
         </List>
 
-        {parsedRecipe.generatedRecipe.tips && parsedRecipe.generatedRecipe.tips.length > 0 && (
+        {tips && tips.length > 0 && (
           <>
             <Typography variant="h5" sx={{ mb: 2, color: 'primary.main' }}>
               Püf Noktaları
             </Typography>
             <List>
-              {parsedRecipe.generatedRecipe.tips.map((tip, index) => (
+              {tips.map((tip, index) => (
                 <ListItem key={index}>
                   <ListItemText 
                     primary={`💡 ${tip}`}

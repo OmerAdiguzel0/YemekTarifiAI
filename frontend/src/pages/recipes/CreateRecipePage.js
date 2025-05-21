@@ -104,6 +104,7 @@ const CreateRecipePage = () => {
         return;
       }
 
+      // Önce tarifi oluştur
       const response = await fetch(`${API_URL}/recipe/create`, {
         method: 'POST',
         headers: {
@@ -126,6 +127,26 @@ const CreateRecipePage = () => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Tarif kaydedilirken bir hata oluştu');
+      }
+
+      const createdRecipe = await response.json();
+      const recipeId = createdRecipe._id || createdRecipe.recipe?._id;
+
+      // Sonra favorilere ekle
+      const favResponse = await fetch(`${API_URL}/recipes/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipeId,
+          type: 'ai'
+        })
+      });
+      if (!favResponse.ok) {
+        const errorData = await favResponse.json();
+        throw new Error(errorData.error || 'Favorilere eklenemedi');
       }
 
       navigate('/kaydedilen-tarifler');

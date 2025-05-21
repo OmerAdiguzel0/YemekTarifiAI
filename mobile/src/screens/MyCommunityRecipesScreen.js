@@ -91,27 +91,33 @@ const MyCommunityRecipesScreen = ({ navigation, route }) => {
         </View>
       </Modal>
       {/* /Custom Modal */}
-      <FlatList
-        data={recipes}
-        keyExtractor={item => item._id}
-        renderItem={({ item }) => (
-          <View style={styles.recipeCard}>
-            <Text style={styles.recipeTitle}>{item.title}</Text>
-            <Text style={styles.sectionTitle}>Malzemeler:</Text>
-            {(item.ingredients || []).slice(0, 3).map((ingredient, idx) => (
-              <Text key={idx} style={styles.ingredient}>• {ingredient}</Text>
-            ))}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
-                <Text style={styles.buttonText}>Düzenle</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item._id)}>
-                <Text style={styles.buttonText}>Sil</Text>
-              </TouchableOpacity>
+      {recipes.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Henüz tarif oluşturmadınız.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={recipes}
+          keyExtractor={item => item._id}
+          renderItem={({ item }) => (
+            <View style={styles.recipeCard}>
+              <Text style={styles.recipeTitle}>{item.title}</Text>
+              <Text style={styles.sectionTitle}>Malzemeler:</Text>
+              {(item.ingredients || []).slice(0, 3).map((ingredient, idx) => (
+                <Text key={idx} style={styles.ingredient}>• {ingredient}</Text>
+              ))}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
+                  <Text style={styles.buttonText}>Düzenle</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item._id)}>
+                  <Text style={styles.buttonText}>Sil</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -226,6 +232,16 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

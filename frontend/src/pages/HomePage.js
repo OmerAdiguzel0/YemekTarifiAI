@@ -76,6 +76,32 @@ const HomePage = () => {
                 <Card sx={{ maxWidth: 600, mx: 'auto', bgcolor: 'white', borderRadius: 2, boxShadow: 3, mt: 4 }}>
                     <CardContent>
                         <Typography variant="h5" component="h2" sx={{ color: '#1a237e', mb: 2 }}>
+                            Topluluk Tarifleri
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#5c6bc0', mb: 2 }}>
+                            Diğer kullanıcıların paylaştığı tarifleri keşfedin ve kendi tariflerinizi toplulukla paylaşın.
+                        </Typography>
+                    </CardContent>
+                    <CardActions sx={{ p: 2 }}>
+                        <Button 
+                            variant="contained" 
+                            fullWidth
+                            sx={{ 
+                                bgcolor: '#4caf50',
+                                '&:hover': {
+                                    bgcolor: '#388e3c'
+                                }
+                            }}
+                            onClick={() => navigate('/topluluk-tarifleri')}
+                        >
+                            Topluluk Tariflerini Keşfet
+                        </Button>
+                    </CardActions>
+                </Card>
+
+                <Card sx={{ maxWidth: 600, mx: 'auto', bgcolor: 'white', borderRadius: 2, boxShadow: 3, mt: 4 }}>
+                    <CardContent>
+                        <Typography variant="h5" component="h2" sx={{ color: '#1a237e', mb: 2 }}>
                             Kaydedilen Tarifler
                         </Typography>
                         <Typography variant="body1" sx={{ color: '#5c6bc0', mb: 2 }}>
@@ -98,6 +124,8 @@ const HomePage = () => {
                         </Button>
                     </CardActions>
                 </Card>
+
+                
             </Container>
         </Box>
     );

@@ -7,6 +7,10 @@ import HomePage from './pages/HomePage';
 import CreateRecipePage from './pages/recipes/CreateRecipePage';
 import SavedRecipesPage from './pages/recipes/SavedRecipesPage';
 import RecipeDetailPage from './pages/recipes/RecipeDetailPage';
+import CommunityRecipesPage from './pages/recipes/CommunityRecipesPage';
+import CommunityRecipeSharePage from './pages/recipes/CommunityRecipeSharePage';
+import MyCommunityRecipesPage from './pages/recipes/MyCommunityRecipesPage';
+import EditCommunityRecipePage from './pages/recipes/EditCommunityRecipePage';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
@@ -78,6 +82,38 @@ function App() {
                         element={
                             <PrivateRoute>
                                 <RecipeDetailPage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/topluluk-tarifleri"
+                        element={
+                            <PrivateRoute>
+                                <CommunityRecipesPage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/tarif-paylas"
+                        element={
+                            <PrivateRoute>
+                                <CommunityRecipeSharePage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/topluluk-tariflerim"
+                        element={
+                            <PrivateRoute>
+                                <MyCommunityRecipesPage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/topluluk-tariflerim/duzenle/:id"
+                        element={
+                            <PrivateRoute>
+                                <EditCommunityRecipePage />
                             </PrivateRoute>
                         }
                     />
