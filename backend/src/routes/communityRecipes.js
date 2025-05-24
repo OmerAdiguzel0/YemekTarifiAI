@@ -8,7 +8,21 @@ const auth = require('../middleware/auth');
 // Topluluk tariflerini listele (beğeni sayısına göre sıralı)
 router.get('/', auth, async (req, res) => {
   try {
-    const recipes = await CommunityRecipe.find().sort({ likeCount: -1 });
+    const { title, ingredient } = req.query;
+    let filter = {};
+    if (title) {
+      filter.title = { $regex: title, $options: 'i' };
+    }
+    if (ingredient) {
+      // Birden fazla malzeme desteği (AND mantığı, $and ile)
+      const ingredientsArr = ingredient.split(',').map(i => i.trim()).filter(Boolean);
+      if (ingredientsArr.length > 1) {
+        filter.$and = ingredientsArr.map(ing => ({ ingredients: { $elemMatch: { $regex: ing, $options: 'i' } } }));
+      } else {
+        filter.ingredients = { $elemMatch: { $regex: ingredient, $options: 'i' } };
+      }
+    }
+    const recipes = await CommunityRecipe.find(filter).sort({ likeCount: -1 });
     let userId = null;
     if (req.user && req.user.userId) userId = req.user.userId;
     // Her tarif için liked bilgisini ekle

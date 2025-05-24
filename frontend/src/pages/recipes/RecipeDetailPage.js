@@ -154,6 +154,12 @@ ${recipe.generatedRecipe.tips ? `\nPüf Noktaları:\n${recipe.generatedRecipe.ti
             </List>
           </>
         )}
+
+        {recipe.username && (
+          <Typography variant="body2" sx={{ textAlign: 'center', color: '#888', mt: 2 }}>
+            Tarifi paylaşan: {recipe.username}
+          </Typography>
+        )}
       </Paper>
     </Container>
   );

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, TextInput, Modal } from 'react-native';
 import { getCommunityRecipes, likeCommunityRecipe, saveCommunityRecipe } from '../services/api';
 import { useFocusEffect } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 // Basit Toast Component (sadece web için)
 const WebToast = ({ message, visible }) => {
@@ -31,21 +32,62 @@ const CommunityRecipesScreen = ({ navigation, route }) => {
   const [toastVisible, setToastVisible] = useState(false);
   const toastTimeout = useRef(null);
   const [toastMessage, setToastMessage] = useState('');
+  const [titleFilter, setTitleFilter] = useState('');
+  const [ingredientFilter, setIngredientFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [pressedIndex, setPressedIndex] = useState(-1);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <View style={{ flexDirection: 'row', gap: 12, marginRight: 16 }}>
-          <TouchableOpacity onPress={() => navigation.navigate('CommunityRecipeShare')}>
-            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Tarif Paylaş</Text>
+        <View style={{ flexDirection: 'row', marginRight: 16 }}>
+          <TouchableOpacity onPress={() => setMenuVisible(true)}>
+            <Text style={{ fontSize: 28, color: '#fff', fontWeight: 'bold', paddingHorizontal: 8 }}>⋮</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('MyCommunityRecipes')}>
-            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Tariflerim</Text>
-          </TouchableOpacity>
+          <Modal
+            visible={menuVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setMenuVisible(false)}
+          >
+            <TouchableOpacity
+              style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.2)' }}
+              activeOpacity={1}
+              onPressOut={() => setMenuVisible(false)}
+            >
+              <View style={{ position: 'absolute', top: 40, right: 10, minWidth: 160 }}>
+                {/* Caret (üçgen) */}
+                <View style={{ alignItems: 'flex-end', marginRight: 18, marginBottom: -6 }}>
+                  <View style={{ width: 0, height: 0, borderLeftWidth: 8, borderRightWidth: 8, borderBottomWidth: 10, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: '#fff' }} />
+                </View>
+                <View style={{ backgroundColor: '#fff', borderRadius: 14, elevation: 8, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, overflow: 'hidden' }}>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', backgroundColor: pressedIndex === 0 ? '#f5f5f5' : '#fff' }}
+                    onPress={() => { setMenuVisible(false); navigation.navigate('CommunityRecipeShare'); }}
+                    onPressIn={() => setPressedIndex(0)}
+                    onPressOut={() => setPressedIndex(-1)}
+                  >
+                    <MaterialIcons name="edit" size={20} color="#3949ab" style={{ marginRight: 10 }} />
+                    <Text style={{ fontSize: 16, color: '#333' }}>Tarif Paylaş</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: pressedIndex === 1 ? '#f5f5f5' : '#fff' }}
+                    onPress={() => { setMenuVisible(false); navigation.navigate('MyCommunityRecipes'); }}
+                    onPressIn={() => setPressedIndex(1)}
+                    onPressOut={() => setPressedIndex(-1)}
+                  >
+                    <MaterialIcons name="book" size={20} color="#3949ab" style={{ marginRight: 10 }} />
+                    <Text style={{ fontSize: 16, color: '#333' }}>Tariflerim</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Modal>
         </View>
       )
     });
-  }, [navigation]);
+  }, [navigation, menuVisible]);
 
   useEffect(() => {
     return () => {
@@ -62,7 +104,7 @@ const CommunityRecipesScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     loadRecipes();
-  }, []);
+  }, [titleFilter, ingredientFilter]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -72,7 +114,10 @@ const CommunityRecipesScreen = ({ navigation, route }) => {
 
   const loadRecipes = async () => {
     try {
-      const data = await getCommunityRecipes();
+      const params = {};
+      if (titleFilter) params.title = titleFilter;
+      if (ingredientFilter) params.ingredient = ingredientFilter;
+      const data = await getCommunityRecipes(params);
       setRecipes(data);
       setLikedRecipes(new Set(data.filter(r => r.liked).map(r => r._id)));
       setLoading(false);
@@ -178,6 +223,30 @@ const CommunityRecipesScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <WebToast message={toastMessage} visible={toastVisible} />
+      <TouchableOpacity
+        style={{ backgroundColor: '#82877c', borderRadius: 8, padding: 10, marginBottom: 12, alignItems: 'center' }}
+        onPress={() => setShowFilters(v => !v)}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Filtrele</Text>
+      </TouchableOpacity>
+      {showFilters && (
+        <>
+          <TextInput
+            style={{ backgroundColor: '#fff', borderRadius: 8, padding: 10, marginBottom: 8, borderWidth: 1, borderColor: '#ddd' }}
+            placeholder="Tarif Başlığına Göre Ara"
+            value={titleFilter}
+            onChangeText={setTitleFilter}
+            autoCorrect={false}
+          />
+          <TextInput
+            style={{ backgroundColor: '#fff', borderRadius: 8, padding: 10, marginBottom: 16, borderWidth: 1, borderColor: '#ddd' }}
+            placeholder="Malzemeye Göre Ara (malzemeler arasına virgül koyun)"
+            value={ingredientFilter}
+            onChangeText={setIngredientFilter}
+            autoCorrect={false}
+          />
+        </>
+      )}
       <FlatList
         data={recipes}
         renderItem={renderRecipeItem}

@@ -60,7 +60,7 @@ export default function HomeScreen({ navigation }) {
                     <Text style={styles.buttonText}>Yeni Tarif Oluştur</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('CommunityRecipes')}>
+                <TouchableOpacity style={[styles.button, styles.communityButton]} onPress={() => navigation.navigate('CommunityRecipes')}>
                     <Text style={styles.buttonText}>Topluluk Tarifleri</Text>
                 </TouchableOpacity>
 
@@ -135,5 +135,8 @@ const styles = StyleSheet.create({
     },
     savedRecipesButton: {
         backgroundColor: '#4caf50'
+    },
+    communityButton: {
+        backgroundColor: '#0089df'
     }
 });

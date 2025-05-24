@@ -46,6 +46,9 @@ const CommunityRecipeDetailScreen = ({ route, navigation }) => {
           <Text style={styles.buttonText}>Tarifi Kaydet</Text>
         </TouchableOpacity>
       </View>
+      <Text style={styles.sharedBy}>
+        Tarifi paylaşan: {recipe.username}
+      </Text>
     </ScrollView>
   );
 };
@@ -94,6 +97,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  sharedBy: {
+    textAlign: 'center',
+    color: '#888',
+    fontSize: 14,
+    marginBottom: 16,
+    marginTop: -8
   },
 });
 

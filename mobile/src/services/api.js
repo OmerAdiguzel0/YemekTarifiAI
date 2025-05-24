@@ -85,9 +85,16 @@ export const recipeService = {
 };
 
 // Topluluk tariflerini listele
-export const getCommunityRecipes = async () => {
+export const getCommunityRecipes = async (params = {}) => {
     try {
-        const response = await api.get('/community/recipes');
+        let query = '';
+        if (params && (params.title || params.ingredient)) {
+            const q = [];
+            if (params.title) q.push(`title=${encodeURIComponent(params.title)}`);
+            if (params.ingredient) q.push(`ingredient=${encodeURIComponent(params.ingredient)}`);
+            query = '?' + q.join('&');
+        }
+        const response = await api.get(`/community/recipes${query}`);
         return response.data;
     } catch (error) {
         console.error('getCommunityRecipes error:', error.response?.data || error.message);

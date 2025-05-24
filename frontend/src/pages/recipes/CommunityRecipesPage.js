@@ -11,7 +11,8 @@ import {
   CircularProgress,
   Alert,
   Chip,
-  Grid
+  Grid,
+  TextField
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -27,10 +28,14 @@ const CommunityRecipesPage = () => {
   const [error, setError] = useState('');
   const [likedRecipes, setLikedRecipes] = useState(new Set());
   const [savedRecipes, setSavedRecipes] = useState(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  const [titleFilter, setTitleFilter] = useState('');
+  const [ingredientFilter, setIngredientFilter] = useState('');
 
   useEffect(() => {
     fetchRecipes();
-  }, []);
+    // eslint-disable-next-line
+  }, [titleFilter, ingredientFilter]);
 
   const fetchRecipes = async () => {
     try {
@@ -39,8 +44,12 @@ const CommunityRecipesPage = () => {
         navigate('/giris');
         return;
       }
-
-      const response = await fetch(`${API_URL}/community/recipes`, {
+      let url = `${API_URL}/community/recipes`;
+      const params = [];
+      if (titleFilter) params.push(`title=${encodeURIComponent(titleFilter)}`);
+      if (ingredientFilter) params.push(`ingredient=${encodeURIComponent(ingredientFilter)}`);
+      if (params.length) url += `?${params.join('&')}`;
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -156,6 +165,13 @@ const CommunityRecipesPage = () => {
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => setShowFilters(v => !v)}
+          >
+            Filtrele
+          </Button>
+          <Button
             variant="contained"
             color="primary"
             onClick={() => navigate('/tarif-paylas')}
@@ -171,6 +187,27 @@ const CommunityRecipesPage = () => {
           </Button>
         </Box>
       </Box>
+
+      {showFilters && (
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <TextField
+            label="Tarif Başlığına Göre Ara"
+            variant="outlined"
+            value={titleFilter}
+            onChange={e => setTitleFilter(e.target.value)}
+            size="small"
+            fullWidth
+          />
+          <TextField
+            label="Malzemeye Göre Ara (malzemeler arasına virgül koyun)"
+            variant="outlined"
+            value={ingredientFilter}
+            onChange={e => setIngredientFilter(e.target.value)}
+            size="small"
+            fullWidth
+          />
+        </Box>
+      )}
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
