@@ -84,4 +84,56 @@ export const authService = {
     }
 };
 
+// Yorumları listele
+export const getComments = async (recipeId) => {
+    try {
+        const response = await api.get(`/community/recipes/${recipeId}/comments`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: 'Yorumlar alınamadı' };
+    }
+};
+
+// Yorum ekle
+export const addComment = async (recipeId, text, parentCommentId = null) => {
+    try {
+        const body = { text };
+        if (parentCommentId) body.parentCommentId = parentCommentId;
+        const response = await api.post(`/community/recipes/${recipeId}/comments`, body);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: 'Yorum eklenemedi' };
+    }
+};
+
+// Yorum sil
+export const deleteComment = async (commentId) => {
+    try {
+        const response = await api.delete(`/community/recipes/comments/${commentId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: 'Yorum silinemedi' };
+    }
+};
+
+// Yorum güncelle
+export const updateComment = async (commentId, text) => {
+    try {
+        const response = await api.put(`/community/recipes/comments/${commentId}`, { text });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: 'Yorum güncellenemedi' };
+    }
+};
+
+// Yorum beğen veya beğeniyi kaldır
+export const likeComment = async (commentId) => {
+    try {
+        const response = await api.post(`/community/recipes/comments/${commentId}/like`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: 'Yorum beğenilemedi' };
+    }
+};
+
 export default api; 
