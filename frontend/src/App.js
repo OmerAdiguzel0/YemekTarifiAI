@@ -11,6 +11,7 @@ import CommunityRecipesPage from './pages/recipes/CommunityRecipesPage';
 import CommunityRecipeSharePage from './pages/recipes/CommunityRecipeSharePage';
 import MyCommunityRecipesPage from './pages/recipes/MyCommunityRecipesPage';
 import EditCommunityRecipePage from './pages/recipes/EditCommunityRecipePage';
+import ProfilePage from './pages/ProfilePage';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
@@ -114,6 +115,14 @@ function App() {
                         element={
                             <PrivateRoute>
                                 <EditCommunityRecipePage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/profil"
+                        element={
+                            <PrivateRoute>
+                                <ProfilePage />
                             </PrivateRoute>
                         }
                     />

@@ -15,6 +15,7 @@ import CommunityRecipeDetailScreen from './src/screens/CommunityRecipeDetailScre
 import CommunityRecipeShareScreen from './src/screens/CommunityRecipeShareScreen';
 import MyCommunityRecipesScreen from './src/screens/MyCommunityRecipesScreen';
 import EditCommunityRecipeScreen from './src/screens/EditCommunityRecipeScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const AuthContext = createContext();
@@ -157,6 +158,15 @@ export default function App() {
                                 options={{
                                     headerShown: true,
                                     title: 'Tarifi Düzenle',
+                                    ...commonHeaderStyle
+                                }}
+                            />
+                            <Stack.Screen 
+                                name="Profil" 
+                                component={ProfileScreen}
+                                options={{
+                                    headerShown: true,
+                                    title: 'Profil',
                                     ...commonHeaderStyle
                                 }}
                             />

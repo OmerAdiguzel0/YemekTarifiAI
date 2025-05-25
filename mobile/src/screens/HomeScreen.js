@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -9,13 +9,23 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../App';
 import { API_URL } from '../config';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen({ navigation }) {
     const { signOut } = useAuth();
+    const [username, setUsername] = useState('');
 
     useEffect(() => {
         checkToken();
+        getUserInfo();
     }, []);
+
+    useFocusEffect(
+      React.useCallback(() => {
+        getUserInfo();
+      }, [])
+    );
 
     const checkToken = async () => {
         try {
@@ -41,6 +51,17 @@ export default function HomeScreen({ navigation }) {
         }
     };
 
+    const getUserInfo = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) return;
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            setUsername(payload.username);
+        } catch (e) {
+            console.error('Kullanıcı bilgisi alınamadı:', e);
+        }
+    };
+
     const handleLogout = async () => {
         await signOut();
     };
@@ -48,7 +69,15 @@ export default function HomeScreen({ navigation }) {
     return (
         <View style={styles.container}>
             <View style={styles.card}>
-                <Text style={styles.welcomeText}>Hoş Geldiniz!</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <Text style={[styles.welcomeText, { flex: 1, textAlign: 'center' }]}>Hoş Geldiniz!</Text>
+                    <View style={styles.profileContainer}>
+                        <Text style={styles.username}>{username || 'Kullanıcı'}</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Profil')} style={styles.profileIconButton}>
+                            <MaterialIcons name="person" size={28} color="#3949ab" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
                 <Text style={styles.subtitle}>
                     Yapay zeka destekli tarif asistanınız size yardımcı olmak için hazır.
                 </Text>
@@ -77,8 +106,6 @@ export default function HomeScreen({ navigation }) {
                 >
                     <Text style={styles.buttonText}>Çıkış Yap</Text>
                 </TouchableOpacity>
-
-                
             </View>
         </View>
     );
@@ -138,5 +165,25 @@ const styles = StyleSheet.create({
     },
     communityButton: {
         backgroundColor: '#0089df'
-    }
+    },
+    profileContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: '#f0f2f5',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    username: {
+        fontSize: 16,
+        color: '#1a237e',
+        fontWeight: '600',
+    },
+    profileIconButton: {
+        padding: 4,
+        borderRadius: 16,
+        backgroundColor: '#fff',
+        elevation: 2,
+    },
 });

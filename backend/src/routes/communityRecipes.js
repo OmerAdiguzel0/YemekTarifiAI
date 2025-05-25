@@ -50,7 +50,7 @@ router.post('/', auth, async (req, res) => {
   const { title, description, ingredients, steps, preferences } = req.body;
   const newRecipe = new CommunityRecipe({
     userId: req.user.userId,
-    username: req.user.email,
+    username: req.user.username,
     title,
     description,
     ingredients,
@@ -218,7 +218,7 @@ router.post('/:id/comments', auth, async (req, res) => {
     const commentData = {
       recipeId: req.params.id,
       userId: req.user.userId,
-      username: req.user.email,
+      username: req.user.username,
       text: text.trim()
     };
     if (parentCommentId) commentData.parentCommentId = parentCommentId;

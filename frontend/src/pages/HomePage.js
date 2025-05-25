@@ -33,6 +33,9 @@ const HomePage = () => {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         YemekTarifiAI
                     </Typography>
+                    <Button color="inherit" onClick={() => navigate('/profil')} sx={{ mr: 2 }}>
+                        Profil
+                    </Button>
                     <Button color="inherit" onClick={handleLogout}>
                         Çıkış Yap
                     </Button>
